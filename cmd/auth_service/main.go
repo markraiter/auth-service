@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/markraiter/auth-service/internal/app"
 	"github.com/markraiter/auth-service/internal/config"
 )
 
@@ -20,7 +21,9 @@ func main() {
 
 	log.Info("starting application", slog.Any("config", cfg))
 
-	// TODO: initialize app
+	application := app.New(log, cfg.GRPC.Port, cfg.StoragePath, cfg.TokenTTL)
+
+	application.GRPCSrv.MustRun()
 
 	// TODO: start gRPC-sever application
 }
