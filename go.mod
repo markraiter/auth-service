@@ -4,7 +4,7 @@ go 1.21.1
 
 require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/markraiter/protos v0.0.2
+	github.com/markraiter/protos v0.0.3
 	google.golang.org/grpc v1.59.0
 )
 

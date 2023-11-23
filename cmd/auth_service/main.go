@@ -3,6 +3,8 @@ package main
 import (
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/markraiter/auth-service/internal/app"
 	"github.com/markraiter/auth-service/internal/config"
@@ -19,13 +21,22 @@ func main() {
 
 	log := setupLogger(cfg.Env)
 
-	log.Info("starting application", slog.Any("config", cfg))
+	log.Info("starting application")
 
 	application := app.New(log, cfg.GRPC.Port, cfg.StoragePath, cfg.TokenTTL)
 
-	application.GRPCSrv.MustRun()
+	go application.GRPCSrv.MustRun()
 
-	// TODO: start gRPC-sever application
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+
+	sign := <-stop
+
+	log.Info("stopping application", slog.String("signal", sign.String()))
+
+	application.GRPCSrv.Stop()
+
+	log.Info("application stopped")
 }
 
 func setupLogger(env string) *slog.Logger {
