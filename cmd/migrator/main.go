@@ -1,11 +1,16 @@
-package migrator
+package main
 
 import (
 	"errors"
 	"flag"
 	"fmt"
 
+	// migrations library
 	"github.com/golang-migrate/migrate/v4"
+	// driver for migrations executions
+	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
+	// driver for getting migrations from files
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func main() {
@@ -25,7 +30,7 @@ func main() {
 
 	m, err := migrate.New("file://"+migrationsPath, fmt.Sprintf("sqlite3://%s?x-migrations-table=%s", storagePath, migrationsTable))
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("error creating migrator: %w", err))
 	}
 
 	if err := m.Up(); err != nil {
@@ -35,7 +40,7 @@ func main() {
 			return
 		}
 
-		panic(err)
+		panic(fmt.Errorf("error applying migrations: %w", err))
 	}
 
 	fmt.Println("migrations applied successfully")
