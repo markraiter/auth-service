@@ -5,6 +5,8 @@ import (
 	"time"
 
 	grpcapp "github.com/markraiter/auth-service/internal/app/grpc"
+	"github.com/markraiter/auth-service/internal/services/auth"
+	"github.com/markraiter/auth-service/internal/storage/sqlite"
 )
 
 type App struct {
@@ -13,11 +15,14 @@ type App struct {
 }
 
 func New(log *slog.Logger, grpcPort int, storagePath string, tokenTTL time.Duration) *App {
-	// TODO: initialize storage
+	storage, err := sqlite.New(storagePath)
+	if err != nil {
+		panic(err)
+	}
 
-	// TODO: init service layer
+	authService := auth.New(log, storage, storage, storage, tokenTTL)
 
-	grpcApp := grpcapp.New(log, grpcPort)
+	grpcApp := grpcapp.New(log, authService, grpcPort)
 
 	return &App{
 		GRPCSrv: grpcApp,

@@ -27,12 +27,12 @@ type UserSaver interface {
 }
 
 type UserProvider interface {
-	User(ctx context.Context, email string) (models.User, error)
+	User(ctx context.Context, email string) (*models.User, error)
 	IsAdmin(ctx context.Context, userID int) (bool, error)
 }
 
 type AppProvider interface {
-	App(ctx context.Context, appID int) (models.App, error)
+	App(ctx context.Context, appID int) (*models.App, error)
 }
 
 var (
@@ -89,7 +89,7 @@ func (a *Auth) Login(ctx context.Context, email string, password string, appID i
 
 	log.Info("user logged in successfully")
 
-	token, err := jwt.NewToken(user, app, a.tokenTTL)
+	token, err := jwt.NewToken(*user, *app, a.tokenTTL)
 	if err != nil {
 		a.log.Error("failed to generate token", sl.Err(err))
 
