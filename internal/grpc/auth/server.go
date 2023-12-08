@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/markraiter/auth-service/internal/services/auth"
-	"github.com/markraiter/auth-service/internal/storage"
 	auth_service_v1 "github.com/markraiter/protos/gen/go/auth_service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -56,7 +55,7 @@ func (s *serverAPI) Register(ctx context.Context, req *auth_service_v1.RegisterR
 
 	userID, err := s.auth.RegisterNewUser(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
-		if errors.Is(err, storage.ErrUserExists) {
+		if errors.Is(err, auth.ErrUserExists) {
 			return nil, status.Error(codes.AlreadyExists, "user already exists")
 		}
 
@@ -75,7 +74,7 @@ func (s *serverAPI) IsAdmin(ctx context.Context, req *auth_service_v1.IsAdminReq
 
 	isAdmin, err := s.auth.IsAdmin(ctx, int(req.GetUserId()))
 	if err != nil {
-		if errors.Is(err, storage.ErrUserNotFound) {
+		if errors.Is(err, auth.ErrUserNotFound) {
 			return nil, status.Error(codes.NotFound, "user not found")
 		}
 
@@ -89,7 +88,7 @@ func (s *serverAPI) IsAdmin(ctx context.Context, req *auth_service_v1.IsAdminReq
 
 func validateLogin(req *auth_service_v1.LoginRequest) error {
 	if req.GetEmail() == "" {
-		return status.Error(codes.InvalidArgument, "emailis is required")
+		return status.Error(codes.InvalidArgument, "email is required")
 	}
 
 	if req.GetPassword() == "" {
